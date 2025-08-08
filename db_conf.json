@@ -1,0 +1,39 @@
+{
+  "databases": {
+    "user": {
+      "host": "reader.postgres.backend.prod.tma-private.com",
+      "port": 5432,
+      "dbname": "user",
+      "user": "${PGUSER}",
+      "password": "${PGPASSWORD}"
+    },
+    "message": {
+      "host": "reader.postgres.backend.prod.tma-private.com", 
+      "port": 5432,
+      "dbname": "message",
+      "user": "${PGUSER}",
+      "password": "${PGPASSWORD}"
+    },
+    "cos": {
+      "host": "reader.postgres.backend.prod.tma-private.com",
+      "port": 5432, 
+      "dbname": "cos",
+      "user": "${PGUSER}",
+      "password": "${PGPASSWORD}"
+    },
+    "call": {
+      "host": "reader.postgres.backend.prod.tma-private.com",
+      "port": 5432,
+      "dbname": "call", 
+      "user": "${PGUSER}",
+      "password": "${PGPASSWORD}"
+    },
+    "brain": {
+      "host": "reader.postgres.backend.prod.tma-private.com",
+      "port": 5432,
+      "dbname": "brain",
+      "user": "${PGUSER}",
+      "password": "${PGPASSWORD}"
+    }
+  }
+}
