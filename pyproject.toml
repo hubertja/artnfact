@@ -1,0 +1,19 @@
+[project]
+name = "artnfact-mcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mcp[cli]>=1.12.4",
+    "ruff>=0.12.8",
+    "psycopg[binary]>=3.2.3",
+    "python-dotenv>=1.0.1",
+    "psycopg-pool>=3.2.6",
+]
+
+[project.scripts]
+artnfact-mcp = "main:main"
+
+[tool.uv]
+package = true

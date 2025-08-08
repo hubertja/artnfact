@@ -1,0 +1,8 @@
+main.py
+pyproject.toml
+artnfact_mcp.egg-info/PKG-INFO
+artnfact_mcp.egg-info/SOURCES.txt
+artnfact_mcp.egg-info/dependency_links.txt
+artnfact_mcp.egg-info/entry_points.txt
+artnfact_mcp.egg-info/requires.txt
+artnfact_mcp.egg-info/top_level.txt

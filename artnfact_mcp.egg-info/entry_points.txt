@@ -1,0 +1,2 @@
+[console_scripts]
+artnfact-mcp = main:main

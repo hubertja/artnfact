@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+      "artnfact": {
+        "command": "/Users/hubertjaouen/.local/bin/uv",
+        "args": ["run", "--project", "/Users/hubertjaouen/Documents/Code/artnfact-mcp", "artnfact-mcp"],
+        "env": {
+          "API_KEY": "value"
+        }
+      }
+    }
+  }
