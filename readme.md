@@ -15,7 +15,7 @@ This is WIP, please use accordingly :)
       "mcpServers": {
         "artnfact": {
           "command": "<ABSOLUTE_PATH_TO_YOUR_UV>
-          "args": ["run", "--project", "<ABSOLUTE_PATH_TO_THIS_REPO>", "artnfact-mcp"],
+          "args": ["run", "--project", "<ABSOLUTE_PATH_TO_THIS_REPO>", "artnfact-mcp"]
         }
       }
   }

@@ -60,35 +60,67 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
 
 mcp = FastMCP("Artnfact", lifespan=app_lifespan)
 
+ANALYSIS_PROMPT = """# Identity
+You are a top data scientist, very sharp and impact-driven. 
+
+# Goal
+Let's perform a data analysis answering the question below:
+```
+{query}
+```
+
+# Instructions
+
+* Explain how you will approach the question, with the trade off decisions you make
+
+* Execute the SQL queries on the relevant DBs using the dedicated query_db tool
+  Make sure to use leverage the contextual knowledge provided by the relevant tool before executing any SQL queries.
+
+* Show the results:
+  - If on Cursor: as a table with a title and a subtitle
+  - Otherwise: as a code canvas implementing a chart (with a title and a subtitle as well)
+    The chart should be simple ("The Economist"-style): line or bar chart will do in 99% of cases.
+  In each case:
+    - The title is short and shows the takeaway.
+    - The subtitle is also short and gives a bit more details.
+    - There's nothing more and things are kept minimal.
+
+"""
+
+
+@mcp.prompt(title="Analyze", description="Run a data analysis")
+def analyze(query: str) -> str:
+    return ANALYSIS_PROMPT.format(query=query)
+
+
+@mcp.tool()
+def get_behavioral_instructions_to_answer_data_questions(query: str) -> str:
+    """Provides key information to answer data questions in an optimal way in the context of the company.
+    Run this tool before executing SQL queries or getting contextual knowledge about the DBs"""
+    return ANALYSIS_PROMPT.format(query=query)
+
+
+@mcp.tool()
+def get_db_contextual_knowledge() -> str:
+    """Provides key information allowing to perform accurate SQL queries on DBs.
+    Run this tool before executing SQL queries with query_db, and after fetching behavioral instructions to answer data questions."""
+    artnfact_md_content = None
+    artnfact_md_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "artnfact.md"
+    )
+    if os.path.exists(artnfact_md_path):
+        with open(artnfact_md_path, "r") as file:
+            artnfact_md_content = file.read()
+            return artnfact_md_content
+    return "No contextual knowledge found."
+
 
 @mcp.tool()
 async def query_db(db_name: str, sql_query: str, ctx: Context) -> list[dict[str, str]]:
-    """Run the provided SQL query on the provided PostgreSQL DB and returns the results."""
+    """Run the provided SQL query on the provided PostgreSQL DB and returns the results.
+    Make sure you have fetched the behavioral instructions to answer data questions and the contextual knowledge about the DBs before executing this tool."""
     db = ctx.request_context.lifespan_context.dbs[db_name]
     return await db.query(sql_query)
-
-
-@mcp.tool()
-def plan_answer_to_data_question() -> str:
-    """Returns the optimal plan to answer Data Analysis questions that requires checking our internal DBs data.
-    Leverage this when asked about "users" without any other context, about M1, AskM1, "chats", "texts", "calls", "meetings", "todos", "emails", "notes", "contacts", "etc."""
-    artnfact_md_content = None
-    if os.path.exists("artnfact.md"):
-        with open("artnfact.md", "r") as file:
-            artnfact_md_content = file.read()
-    plan = """I see the question is a Data Analysis question that requires checking our internal DBs data. I will:
-* Think deeply on the right SQL query given our internal data context (See below).
-* Execute the SQL query/queries on the relevant DBs using the dedicated tool I have for this
-* Think about the best chart or table to display the results. I keep things simple and efficient (bar chart, line chart, table, etc.)
-* Provide the result in a simple code snippet"""
-    if artnfact_md_content:
-        plan += f"""
----------------------------------
-INTERNAL DATA CONTEXT
----------------------------------
-{artnfact_md_content}
-"""
-    return plan
 
 
 def main():
