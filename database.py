@@ -48,7 +48,7 @@ class Database:
 
     async def query(
         self, sql: str = "SELECT 'Query result'::text", *params: Any
-    ) -> list[dict[str, str]]:
+    ) -> tuple[list[Any], list[str]]:
         async with self._pool.connection() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(sql, params if params else None)

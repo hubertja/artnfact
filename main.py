@@ -1,16 +1,14 @@
-import sys
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-
-# Add the current directory to Python path to find local modules
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+#import uuid
 
 from mcp.server.fastmcp import Context, FastMCP
 from dotenv import load_dotenv
 from database import Database
 from utils import load_db_config
+#import pandas as pd
 
 load_dotenv()
 
@@ -58,7 +56,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
                 print(f"Error closing database connection: {e}")
 
 
-mcp = FastMCP("Artnfact", lifespan=app_lifespan)
+mcp = FastMCP("Artnfact", lifespan=app_lifespan, instructions="Use the tools provided when the user asks for questions that require structured data analysis (SQL queries on internal DBs).")
 
 ANALYSIS_PROMPT = """# Identity
 You are a top data scientist, very sharp and impact-driven. 
@@ -74,7 +72,9 @@ Let's perform a data analysis answering the question below:
 * Explain how you will approach the question, with the trade off decisions you make
 
 * Execute the SQL queries on the relevant DBs using the dedicated query_db tool
-  Make sure to use leverage the contextual knowledge provided by the relevant tool before executing any SQL queries.
+  Keep the queries as simple as possible.
+  Make sure to leverage the contextual knowledge provided by the relevant tool before executing any SQL queries.
+  Never use `created_at` or `updated_at` as meaningful columns business-wise: they are technical artefacts only.
 
 * Show the results:
   - If on Cursor: as a table with a title and a subtitle
@@ -101,8 +101,8 @@ def get_behavioral_instructions_to_answer_data_questions(query: str) -> str:
 
 
 @mcp.tool()
-def get_db_contextual_knowledge() -> str:
-    """Provides key information allowing to perform accurate SQL queries on DBs.
+def get_product_and_data_contextual_knowledge() -> str:
+    """Provides key product and data contextual information allowing to perform accurate SQL queries on DBs.
     Run this tool before executing SQL queries with query_db, and after fetching behavioral instructions to answer data questions."""
     artnfact_md_content = None
     artnfact_md_path = os.path.join(
@@ -117,7 +117,8 @@ def get_db_contextual_knowledge() -> str:
 
 @mcp.tool()
 async def query_db(db_name: str, sql_query: str, ctx: Context) -> list[dict[str, str]]:
-    """Run the provided SQL query on the provided PostgreSQL DB and returns the results.
+    """Run the provided SQL query on the provided PostgreSQL DB.
+    Returns the data as a list of dictionaries.
     Make sure you have fetched the behavioral instructions to answer data questions and the contextual knowledge about the DBs before executing this tool."""
     db = ctx.request_context.lifespan_context.dbs[db_name]
     return await db.query(sql_query)
